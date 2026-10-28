@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import {
   ChevronLeft,
   ChevronRight,
@@ -9,11 +8,12 @@ import {
   MapPin,
   Calendar,
   Clock,
-  ArrowRight,
 } from "lucide-react";
 import Aurora from "@/components/Aurora";
 import PillNav from "@/components/PillNav";
 
+import EventsExplorer from "@/components/events/EventsExplorer";
+import { allEvents } from "@/data/events";
 interface Event {
   id: number;
   name: string;
@@ -32,10 +32,7 @@ interface CalendarEvent {
   date: string;
 }
 
-function getEventHref(link: string): string {
-  if (!link) return "/events";
-  return link.startsWith("/") ? link : `/${link}`;
-}
+
 
 const events: Event[] = [
   {
@@ -342,11 +339,7 @@ export default function EventsPage() {
     ? events.filter((e) => selectedEventIds.includes(e.id))
     : [];
 
-  const orderedCategories = Array.from(new Set(events.map((e) => e.category)));
-  const categorizedEvents = orderedCategories.reduce((acc, category) => {
-    acc[category] = events.filter((e) => e.category === category);
-    return acc;
-  }, {} as Record<string, Event[]>);
+  
 
   const categoryConfig: Record<string, { title: string; color: string }> = {
     upcoming: { title: "Upcoming Events", color: "from-blue-500 to-cyan-500" },
@@ -579,88 +572,8 @@ export default function EventsPage() {
             </div>
           </div>
 
-          {/* Categorized Events */}
-          <div className="space-y-12">
-            {(
-              Object.keys(categorizedEvents) as Array<
-                keyof typeof categorizedEvents
-              >
-            ).map((category) => {
-              const categoryEvents = categorizedEvents[category];
-              if (categoryEvents.length === 0) return null;
-
-              return (
-                <div key={category}>
-                  <div className="flex items-center gap-3 mb-6">
-                    <div
-                      className={`w-1 h-8 rounded-full bg-gradient-to-b ${categoryConfig[category].color}`}
-                    />
-                    <h2 className="text-3xl font-bold">
-                      {categoryConfig[category].title}
-                    </h2>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {categoryEvents.map((event) => (
-                      <div
-                        key={event.id}
-                        className="group bg-white/5 backdrop-blur-lg rounded-xl overflow-hidden shadow-lg border border-white/10 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#4da6ff]/50 flex flex-col"
-                      >
-                        <div className="relative overflow-hidden h-48">
-                          <img
-                            src={event.image}
-                            alt={event.name}
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-[#0b0f2b]/90 to-transparent" />
-                          <div className="absolute bottom-3 left-3 right-3">
-                            <h3 className="text-xl font-bold text-white">
-                              {event.name}
-                            </h3>
-                          </div>
-                        </div>
-
-                        <div className="p-5 flex flex-col flex-1">
-                          <div className="space-y-2 mb-4">
-                            <div className="flex items-center gap-2 text-gray-300 text-sm">
-                              <Calendar className="w-4 h-4 text-[#4da6ff]" />
-                              <span>{event.date}</span>
-                            </div>
-                            {event.time && (
-                              <div className="flex items-center gap-2 text-gray-300 text-sm">
-                                <Clock className="w-4 h-4 text-[#4da6ff]" />
-                                <span>{event.time}</span>
-                              </div>
-                            )}
-                            <div className="flex items-center gap-2 text-gray-300 text-sm">
-                              <MapPin className="w-4 h-4 text-[#4da6ff]" />
-                              <span>{event.venue}</span>
-                            </div>
-                          </div>
-
-                          {event.description && (
-                            <p className="text-gray-400 text-sm leading-relaxed mb-4">
-                              {event.description}
-                            </p>
-                          )}
-
-                          <div className="mt-auto">
-                            <Link
-                              href={getEventHref(event.link)}
-                              className="inline-flex items-center gap-2 text-[#4da6ff] text-sm font-medium hover:gap-3 transition-all duration-200 hover:text-white"
-                            >
-                              Learn More
-                              <ArrowRight className="w-4 h-4" />
-                            </Link>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                    {/* All events: filters + cards (links go to /events/[slug]) */}
+          <EventsExplorer events={allEvents} />
 
         </div>
       </div>
